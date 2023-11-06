@@ -1,0 +1,17 @@
+{
+    "name": "Ball.Client",
+    "rootNamespace": "",
+    "references": [
+        "GUID:3a8fb39edb59247939eeb4711ffc8013",
+        "GUID:c137e1bf634004f06a8b9e19ec9aaaa9"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
