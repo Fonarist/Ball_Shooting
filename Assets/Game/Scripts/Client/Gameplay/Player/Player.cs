@@ -82,7 +82,7 @@ namespace Ball.Client.Gameplay
             if (Physics.SphereCast(ray, 0.1f, out hit, 100.0f,_enemyMask))
             {
                 float dist = (hit.point - transform.position).magnitude;
-                dist -= 2;
+                dist -= 1.6f;
                 _newPos = transform.position + transform.forward * dist;
             }
             else
