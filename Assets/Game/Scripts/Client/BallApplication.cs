@@ -15,6 +15,8 @@ namespace Ball.Client
         Instance = this;
         
         DontDestroyOnLoad(gameObject);
+
+        Application.targetFrameRate = 60;
       }
 
       Launch();

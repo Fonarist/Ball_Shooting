@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using Ball.Client.Placements;
+using Ball.Client.UI;
 using Ball.Core.Binding;
-using Ball.Core.Placements;
 using UnityEngine;
 
 namespace Ball.Client.Gameplay
@@ -14,10 +12,17 @@ namespace Ball.Client.Gameplay
 
         [Header("Tech")] 
         [SerializeField] private Transform _visual;
+        [SerializeField] private Animator _animator;
         [SerializeField] private Transform _posSpawnProjectile;
         [SerializeField] private Projectile _projectilePrefab;
-        [SerializeField] private Transform _door;
+        [SerializeField] private LayerMask _enemyMask;
+        [SerializeField] private Transform _finish;
+        [SerializeField] private Doors _door;
+        [SerializeField] private Transform _road;
+        [SerializeField] private CameraParent _camera;
 
+        private static readonly int IsJumpKey = Animator.StringToHash("IsJump");
+        
         private float _curEnergy;
         private float _curEnergySpend;
 
@@ -29,6 +34,9 @@ namespace Ball.Client.Gameplay
 
         private bool _isMoving;
         private Vector3 _newPos;
+
+        private EndScreenFeature _endScreenFeature;
+        private ProgressFeature _progressFeature;
         
         private void Awake()
         {
@@ -40,18 +48,29 @@ namespace Ball.Client.Gameplay
 
             _curEnergy = _data.Energy;
             _defScale = _visual.localScale;
+            
+            _camera.SetTarget(transform);
+        }
+
+        private void Start()
+        {
+            _endScreenFeature = ServiceLocator.Resolve<EndScreenFeature>();
+            _progressFeature = ServiceLocator.Resolve<ProgressFeature>();
         }
 
         private void Update()
         {
-            UpdateMoving();
-            
             UpdateInput();
+        }
+
+        private void FixedUpdate()
+        {
+            UpdateMoving();
         }
 
         public void TryMove()
         {
-            StartCoroutine(DelayMove(2.0f));
+            StartCoroutine(DelayMove(1.75f));
         }
 
         private IEnumerator DelayMove(float time)
@@ -60,35 +79,55 @@ namespace Ball.Client.Gameplay
             
             Ray ray = new Ray(transform.position, transform.forward);
             RaycastHit hit;
-            if (Physics.SphereCast(ray, transform.localScale.x, out hit))
+            if (Physics.SphereCast(ray, 0.1f, out hit, 100.0f,_enemyMask))
             {
-                _isMoving = true;
                 float dist = (hit.point - transform.position).magnitude;
                 dist -= 2;
                 _newPos = transform.position + transform.forward * dist;
             }
+            else
+            {
+                _newPos = _finish.position;
+                _newPos.y = transform.position.y;
+            }
+            
+            _isMoving = true;
+            _animator.SetBool(IsJumpKey, true);
         }
 
         private void UpdateMoving()
         {
             if (_isMoving)
             {
-                float distToDoor = (_door.position - transform.position).magnitude;
-                if (distToDoor <= _data.DistToDoor)
+                if (!_door.IsOpened)
                 {
-                    // todoV: win
-                    var placementsModule = ServiceLocator.Resolve<IPlacementsModule>();
-                    placementsModule.InvokePlacement(new RestartLevelPlacement());
+                    float distToDoor = (_door.transform.position - transform.position).magnitude;
+                    if (distToDoor <= _data.DistToDoor)
+                    {
+                        _door.Open();
+                    }
                 }
                 
-                float delta = _data.Speed * Time.deltaTime;
+                var vecToFinish = (_finish.position - transform.position);
+                vecToFinish.y = 0;
+                if (vecToFinish.magnitude < 0.2f)
+                {
+                    _animator.SetBool(IsJumpKey, false);
+                    _isMoving = false;
+                    _endScreenFeature.Show(true);
+                }
+
+                float delta = _data.Speed * Time.fixedDeltaTime;
 
                 float dist = (_newPos - transform.position).magnitude;
-                if (dist <= delta)
+                if (dist <= delta * 2.0f)
                 {
                     transform.position = _newPos;
                     _isMoving = false;
                     _isReadyShoot = true;
+                    _animator.SetBool(IsJumpKey, false);
+                    
+                    _progressFeature.ShowTextHold();
                 }
                 else
                 {
@@ -119,19 +158,20 @@ namespace Ball.Client.Gameplay
 
                     _curEnergySpend += deltaEnergy;
 
+                    var percent = _curEnergySpend / _data.MaxSpendEnergyOneShoot;
+                    _progressFeature.UpdateProgress(percent);
+
                     if (_curEnergySpend >= _data.MaxSpendEnergyOneShoot)
                     {
                         Shoot();
                     }
                     else
                     {
-                        
                         _curEnergy -= deltaEnergy;
                         if (_curEnergy <= 0)
                         {
-                            // todoV: Lose
-                            var placementsModule = ServiceLocator.Resolve<IPlacementsModule>();
-                            placementsModule.InvokePlacement(new RestartLevelPlacement());
+                            _isReadyShoot = false;
+                            _endScreenFeature.Show(false);
                         }
                     
                         UpdateScale();
@@ -142,7 +182,10 @@ namespace Ball.Client.Gameplay
             }
             else if (Input.GetMouseButtonUp(0))
             {
-                Shoot();
+                if (_isPrepareShoot)
+                {
+                    Shoot();
+                }
             }
         }
 
@@ -151,6 +194,8 @@ namespace Ball.Client.Gameplay
             var minusScale = (_data.Energy - _curEnergy) * _data.ScaleChangeByOneEnergy;
             var newScale = _defScale - new Vector3(minusScale, minusScale, minusScale);
             _visual.localScale = newScale;
+
+            _road.localScale = new Vector3(_visual.localScale.x, _road.localScale.y, _road.localScale.z);
         }
 
         private void Shoot()
@@ -158,6 +203,8 @@ namespace Ball.Client.Gameplay
             _isReadyShoot = false;
             _isPrepareShoot = false;
             _curEnergySpend = 0;
+            
+            _progressFeature.Reset();
                 
             _curProjectile.Shoot(transform.forward);
         }

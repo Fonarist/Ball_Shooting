@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _speed: 4
   _scaleChangeByOneEnergy: 0.02
-  _minExplosionRadius: 0.2
+  _minExplosionRadius: 0.05
   _radiusExplosionByOneEnergy: 0.05

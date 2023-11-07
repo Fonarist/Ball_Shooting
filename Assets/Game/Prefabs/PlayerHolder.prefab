@@ -40,6 +40,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6034489276882755634}
+  - component: {fileID: 1982419177898733446}
   m_Layer: 0
   m_Name: VisualHolder
   m_TagString: Untagged
@@ -63,6 +64,26 @@ Transform:
   m_Father: {fileID: 8269754153907037257}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &1982419177898733446
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2703604840768666129}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 58373560e4ada40d987bd89810b9d348, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
 --- !u!1 &5390421686329086184
 GameObject:
   m_ObjectHideFlags: 0
@@ -110,9 +131,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _data: {fileID: 11400000, guid: 52668b878a8d84e4bbcc55bd266ba58b, type: 2}
-  _visual: {fileID: 6034489276882755634}
+  _visual: {fileID: 142976189113543814}
+  _animator: {fileID: 1982419177898733446}
   _posSpawnProjectile: {fileID: 3461381616637945482}
   _projectilePrefab: {fileID: 7079248913682296482, guid: f22499a05e36b4a5391878d1b8f622ff, type: 3}
+  _enemyMask:
+    serializedVersion: 2
+    m_Bits: 64
+  _finish: {fileID: 0}
+  _door: {fileID: 0}
+  _road: {fileID: 0}
+  _camera: {fileID: 0}
 --- !u!1 &7539008592278953246
 GameObject:
   m_ObjectHideFlags: 0
@@ -174,7 +203,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 4703708c7da624c74abc80f049e8d32c, type: 2}
+  - {fileID: 2100000, guid: 3f99963102cea41e887092e3adfd8ea5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
